@@ -601,6 +601,100 @@
 
   a { color: var(--text); }
 
+  /* Mode toggle */
+  .mode-toggle {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    background: var(--surface2);
+    border-radius: 99px;
+    padding: 3px;
+    border: 0.5px solid var(--border);
+    width: fit-content;
+  }
+
+  .mode-btn {
+    padding: 5px 16px;
+    border-radius: 99px;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+    min-height: 30px;
+  }
+
+  .mode-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .mode-btn:hover:not(.active) { color: var(--text); }
+
+  /* Quiz */
+  .quiz-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .quiz-term {
+    font-family: var(--font);
+    font-size: 26px;
+    font-weight: normal;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 1.25rem;
+  }
+
+  .quiz-option {
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text);
+    font-family: var(--font-sans);
+    text-align: left;
+    line-height: 1.5;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    min-height: 44px;
+  }
+
+  .quiz-option:hover:not(:disabled) { background: var(--surface2); }
+  .quiz-option:disabled { cursor: default; }
+  .quiz-option.correct { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+  .quiz-option.wrong { background: rgba(192,57,43,0.08); border-color: rgba(192,57,43,0.25); color: #c0392b; }
+  .quiz-option.reveal-correct { background: var(--success-bg); border-color: var(--success-border); }
+
+  .quiz-feedback {
+    margin-top: 1rem;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+
+  .quiz-feedback.correct { color: var(--success); }
+  .quiz-feedback.wrong { color: #c0392b; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .quiz-card { padding: 1.5rem; }
+    .quiz-term { font-size: 22px; }
+  }
+
   /* Mobile */
   @media (max-width: 768px) {
     body { flex-direction: column; }
@@ -696,6 +790,11 @@
     <span class="progress-label" id="progressLabel">0 mastered</span>
   </div>
 
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeStudyBtn" onclick="setMode('study')">Study</button>
+    <button class="mode-btn" id="modeQuizBtn" onclick="setMode('quiz')">Quiz</button>
+  </div>
+
   <div id="cardContainer"></div>
 
   <div class="notes-section" id="notesSection">
@@ -787,6 +886,8 @@ let isFlipped = false;
 let mastered = {};
 let notes = {};
 let sidebarOpen = false;
+let quizMode = false;
+let quizQuestion = null; // { card, options:[{text,isCorrect}], selected: null|number }
 
 Object.keys(DECKS).forEach(k => { mastered[k] = new Set(); });
 
@@ -999,6 +1100,19 @@ function toggleSidebar() {
 function renderAll() {
   renderTabs();
   renderProgress();
+  updateModeToggle();
+  renderCard();
+}
+
+function updateModeToggle() {
+  document.getElementById('modeStudyBtn').classList.toggle('active', !quizMode);
+  document.getElementById('modeQuizBtn').classList.toggle('active', quizMode);
+}
+
+function setMode(mode) {
+  quizMode = mode === 'quiz';
+  quizQuestion = null;
+  updateModeToggle();
   renderCard();
 }
 
@@ -1032,7 +1146,119 @@ function renderProgress() {
   document.getElementById('progressLabel').textContent = `${m} of ${deck.length} mastered`;
 }
 
+// ── Quiz ──────────────────────────────────────────────────
+function buildQuizQuestion() {
+  const deck = DECKS[currentDeck].cards;
+  const card = deck[currentIndex];
+  const others = deck.filter(c => c.id !== card.id).sort(() => Math.random() - 0.5).slice(0, 3);
+  const options = [
+    { text: card.technical, isCorrect: true },
+    ...others.map(d => ({ text: d.technical, isCorrect: false }))
+  ].sort(() => Math.random() - 0.5);
+  quizQuestion = { card, options, selected: null };
+}
+
+function renderQuiz() {
+  const deck = DECKS[currentDeck].cards;
+  const container = document.getElementById('cardContainer');
+
+  renderSidebar();
+
+  if (mastered[currentDeck].size === deck.length) {
+    container.innerHTML = `<div class="completion"><div class="completion-mark">✓</div><h2>Deck complete</h2><p>All ${deck.length} cards mastered.</p><button class="nav-btn" onclick="resetDeck()">Start over</button></div>`;
+    document.getElementById('notesSection').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('notesSection').style.display = 'none';
+
+  while (mastered[currentDeck].has(deck[currentIndex].id)) {
+    currentIndex = (currentIndex + 1) % deck.length;
+  }
+
+  if (!quizQuestion || quizQuestion.card.id !== deck[currentIndex].id) buildQuizQuestion();
+
+  const { card, options, selected } = quizQuestion;
+  const answered = selected !== null;
+  const remaining = deck.length - mastered[currentDeck].size;
+  const isMastered = mastered[currentDeck].has(card.id);
+
+  const optionsHTML = options.map((opt, i) => {
+    let cls = 'quiz-option';
+    if (answered) {
+      if (i === selected && opt.isCorrect) cls += ' correct';
+      else if (i === selected && !opt.isCorrect) cls += ' wrong';
+      else if (opt.isCorrect) cls += ' reveal-correct';
+    }
+    return `<button class="${cls}" onclick="handleQuizAnswer(${i})" ${answered ? 'disabled' : ''}>${opt.text}</button>`;
+  }).join('');
+
+  let feedbackHTML = '';
+  if (answered) {
+    const isCorrect = options[selected].isCorrect;
+    feedbackHTML = `<div class="quiz-feedback ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? 'Correct.' : 'Not quite — the correct answer is highlighted.'}</div>`;
+  }
+
+  container.innerHTML = `
+    <div class="quiz-card">
+      <div class="face-label">Quiz — choose the definition</div>
+      <div class="quiz-term">${card.term}</div>
+      <span class="category-tag">${card.category}</span>
+      <div class="quiz-options">${optionsHTML}</div>
+      ${feedbackHTML}
+    </div>
+    ${answered ? `
+    <div class="action-row">
+      <button class="btn" onclick="nextQuizCard(event)">Next →</button>
+      ${options[selected].isCorrect && !isMastered ? `<button class="btn btn-mastered" onclick="markMasteredQuiz(event)">Mark as mastered ✓</button>` : ''}
+    </div>` : ''}
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevQuizCard(event)" ${currentIndex === 0 ? 'disabled' : ''}>← Prev</button>
+      <span class="card-counter">${currentIndex + 1} / ${deck.length} · ${remaining} remaining</span>
+      <button class="nav-btn" onclick="nextQuizCard(event)">Next →</button>
+    </div>
+  `;
+}
+
+function handleQuizAnswer(idx) {
+  if (!quizQuestion || quizQuestion.selected !== null) return;
+  quizQuestion.selected = idx;
+  renderQuiz();
+}
+
+function nextQuizCard(e) {
+  if (e) e.stopPropagation();
+  const deck = DECKS[currentDeck].cards;
+  let next = (currentIndex + 1) % deck.length;
+  let attempts = 0;
+  while (mastered[currentDeck].has(deck[next].id) && attempts < deck.length) {
+    next = (next + 1) % deck.length;
+    attempts++;
+  }
+  currentIndex = next;
+  quizQuestion = null;
+  renderQuiz();
+}
+
+function prevQuizCard(e) {
+  if (e) e.stopPropagation();
+  const deck = DECKS[currentDeck].cards;
+  currentIndex = (currentIndex - 1 + deck.length) % deck.length;
+  quizQuestion = null;
+  renderQuiz();
+}
+
+function markMasteredQuiz(e) {
+  if (e) e.stopPropagation();
+  mastered[currentDeck].add(currentCard().id);
+  renderProgress();
+  renderTabs();
+  scheduleSave();
+  nextQuizCard(null);
+}
+
 function renderCard() {
+  if (quizMode) { renderQuiz(); return; }
   const deck = DECKS[currentDeck].cards;
   const container = document.getElementById('cardContainer');
 
@@ -1159,6 +1385,7 @@ function resetDeck() {
 function jumpToCard(idx) {
   currentIndex = idx;
   isFlipped = false;
+  quizQuestion = null;
   renderCard();
   renderSidebar();
 }
@@ -1167,6 +1394,7 @@ function switchDeck(key) {
   currentDeck = key;
   currentIndex = 0;
   isFlipped = false;
+  quizQuestion = null;
   renderTabs();
   renderProgress();
   renderCard();
