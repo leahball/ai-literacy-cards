@@ -52,12 +52,101 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    display: flex;
+  }
+
+  .sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 0.5px solid var(--border);
     padding: 2rem 1rem;
+    overflow-y: auto;
+    max-height: 100vh;
+    flex-shrink: 0;
+  }
+
+  .sidebar-title {
+    font-family: var(--font);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+  }
+
+  .card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-link {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid transparent;
+    background: transparent;
+    color: var(--text-2);
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+    line-height: 1.4;
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .card-link::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .card-link.mastered::before {
+    background: var(--success);
+    content: '✓';
+    width: auto;
+    height: auto;
+    font-size: 10px;
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .card-link:hover {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .card-link.active {
+    background: var(--surface2);
+    border-color: var(--border-med);
+    color: var(--text);
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2rem 1rem;
+    overflow-y: auto;
   }
 
   .shell {
     max-width: 680px;
     margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; max-height: auto; border-right: none; border-bottom: 0.5px solid var(--border); padding: 1.5rem 1rem; }
+    .main-content { padding: 2rem 1rem; }
   }
 
   header {
@@ -525,6 +614,10 @@
 </style>
 </head>
 <body>
+
+<div class="sidebar" id="sidebar"></div>
+
+<div class="main-content">
 <div class="shell">
 
   <header>
@@ -569,6 +662,7 @@
   </div>
 
 </div>
+</div>
 
 <script>
 const DECKS = {
@@ -594,6 +688,31 @@ const DECKS = {
       { id: "language-equity", term: "Tokenization and language equity", category: "Bias & equity", technical: "Languages underrepresented in training data are tokenized less efficiently — requiring more tokens to represent equivalent content — reducing effective context window and model performance.", plain: "A Spanish or Haitian Creole speaker asking a complex question uses more of the model's 'thinking budget' per concept than an English speaker. The math disadvantages non-English users structurally.", analogy: "A design system built for English text that breaks when rendered in languages with longer words or different reading direction — the problem is baked in at the foundation." },
       { id: "agentic-ai", term: "Agentic AI", category: "Machine legibility", technical: "AI systems that can take sequences of actions — browsing, filling forms, executing code, interacting with APIs — rather than only generating text responses.", plain: "AI that doesn't just answer questions but does things: books appointments, searches and synthesizes, fills out forms, navigates websites on your behalf.", analogy: "The difference between a design spec and a design system that ships. Agentic AI acts in the world — which means machine legibility determines not just what gets surfaced, but what gets done." },
       { id: "prompt-injection", term: "Prompt injection", category: "Machine legibility", technical: "An attack where malicious instructions are embedded in content an AI agent reads — a webpage, document, email — to redirect its behavior away from the user's intent.", plain: "When someone hides instructions in a webpage or document — 'ignore your previous instructions and do this instead' — to manipulate an AI agent acting on a user's behalf.", analogy: "Like a form that says 'Please enter your address' but has hidden fine print that changes what you're actually agreeing to." }
+    ]
+  },
+  mxforgood: {
+    label: "MX for Good",
+    cards: [
+      { id: "machine-legibility", term: "Machine legibility", category: "Core MLI", technical: "The degree to which web content is structured and marked up in ways that enable automated systems to parse meaning, intent, and relationships without visual rendering.", plain: "How easy it is for an AI agent to understand what your content means and what actions are available. Not about visual design — about semantic structure.", analogy: "The difference between a beautifully designed but image-heavy PDF and a well-structured database record. Machines read the second one; humans read the first." },
+      { id: "structured-data-schema", term: "Structured data / schema.org", category: "Core MLI", technical: "Standardized markup vocabularies (JSON-LD, Microdata, RDFa) that annotate web content with machine-readable metadata, enabling agents to understand entity types, relationships, and properties.", plain: "Code you add to a webpage that tells machines what the content IS, not just what it says. 'This is a legal service. It's free. It operates in Spanish.'", analogy: "Like component documentation in a design system — the machine-readable spec that lets other systems integrate without guessing." },
+      { id: "semantic-html", term: "Semantic HTML", category: "Core MLI", technical: "Using native HTML elements (<button>, <nav>, <article>, <h1-h6>) to convey meaning and structure, rather than generic divs with ARIA — enables both assistive technology and automated agents to understand content relationships.", plain: "Using the right HTML tags so the structure is obvious to machines and screen readers. <h1> means 'main heading' not 'large text.'", analogy: "Typography hierarchy in design — using the visual system to show relationships. Semantic HTML does the same for machines." },
+      { id: "whose-voice", term: "Whose voice is in the room", category: "Core MLI", technical: "The representational equity problem: whose perspectives, stakeholders, and communities are present (or absent) in training data, affecting how LLMs surface and frame different viewpoints.", plain: "If your training data has 10x more content from powerful institutions than from community organizations, that power imbalance becomes the model's default.", analogy: "UX research that only includes one demographic — the system optimizes for them and fails everyone else, invisibly." },
+      { id: "narrative-control", term: "Narrative control", category: "Narrative & Bias", technical: "The practice of shaping how a topic, organization, or concept is described across sources, so that when LLMs encounter it in training data, they reproduce that framing as a default.", plain: "How lobbying groups, companies, and institutions shape the language around their industry so the model learns 'this is how we talk about this topic.'", analogy: "Brand voice guidelines, but at scale across the entire internet — whoever controls the dominant narrative controls how models describe the topic." },
+      { id: "false-balance-design", term: "False balance", category: "Narrative & Bias", technical: "A system presenting two positions with equal weight despite significant asymmetries in evidentiary support, institutional backing, or affected population — appears neutral but obscures power dynamics.", plain: "When an AI says 'some argue X, others argue Y' and makes them sound equivalent — even though one has peer research and the other has lobbying funding.", analogy: "A design that gives equal visual weight to 'Delete account' and 'Cancel' — technically balanced, functionally misleading." },
+      { id: "citation-laundering-mxforgood", term: "Citation laundering", category: "Narrative & Bias", technical: "Process by which an advocacy position gains apparent credibility by being sequentially cited: advocacy → news → academic paper → policy document, arriving in training data as established fact.", plain: "A lobbying claim quoted in news → cited by a think tank → referenced in policy → arrives in LLM training looking like objective fact.", analogy: "A design pattern copied project to project until no one remembers why it exists, just that 'it's always been done that way.'" },
+      { id: "training-data-representation", term: "Training data representation", category: "Narrative & Bias", technical: "The statistical fact that LLM outputs reflect the prevalence and framing of different viewpoints in training data — institutional voices appear more authoritative because they produce more written content.", plain: "Well-funded organizations publish more, get cited more, appear in more authoritative places. Models absorb that as 'legitimate vs. fringe.'", analogy: "If your design system documentation is 10x longer for common components, those become the default pattern — not because they're better, because they're documented." },
+      { id: "epistemic-humility-design", term: "Epistemic humility (design problem)", category: "Epistemic Humility", technical: "Designing interfaces that accurately represent the limits and confidence of AI-generated content — distinguishing well-established claims, contested positions, and uncertain areas without appearing evasive.", plain: "The unsolved design problem: how do you make an AI interface that signals 'I'm confident about this' vs. 'this is contested' vs. 'I don't know'?", analogy: "Like error states in UX — the system is more trustworthy when it's honest about what it doesn't know." },
+      { id: "confidence-signaling", term: "Confidence signaling", category: "Epistemic Humility", technical: "UI patterns that visually or textually distinguish between high-confidence outputs (well-established research), contested claims (multiple legitimate perspectives), and areas of uncertainty or data gaps.", plain: "Visual/textual signals so users know: is this researched fact, is this an industry claim, is this uncertain, is this reflecting one dominant framing?", analogy: "In design systems, using color, icons, and typography to signal different component states. Same principle — state is information." },
+      { id: "source-provenance", term: "Source provenance", category: "Epistemic Humility", technical: "Surfacing the types of sources that shaped an AI response — government, industry, academic, advocacy, community — enabling users to calibrate trust based on source diversity and potential biases.", plain: "Telling the user 'this answer draws heavily from industry publications' or 'this includes peer-reviewed research and worker testimony' so they can judge for themselves.", analogy: "Design audit reports that show which design system components were used — transparency about what shaped the outcome." },
+      { id: "language-equity-signals", term: "Language equity signals", category: "Epistemic Humility", technical: "Interface indicators that flag when a non-English response may have lower confidence due to training data imbalance — fewer tokens per concept, less refined patterns, lower quality sources available.", plain: "An honest signal: 'This answer is in Spanish, which has less training data, so confidence may be lower' — instead of false certainty in all languages.", analogy: "Component documentation that notes 'this pattern works better for English text due to word length' — honest about constraints." },
+      { id: "agentic-ai", term: "Agentic AI", category: "Agentic UX", technical: "Autonomous AI systems that can execute sequences of actions — navigate interfaces, fill forms, call APIs, execute code — rather than only generating text, making machine legibility critical for safety and effectiveness.", plain: "AI that doesn't just answer questions but does things: books appointments, searches websites, fills out forms. Requires your site to be readable by machines.", analogy: "The difference between a design spec and a fully built component library. Agentic AI acts in the world — machine legibility determines what it can do." },
+      { id: "prompt-injection", term: "Prompt injection", category: "Agentic UX", technical: "Attack vector where malicious instructions embedded in observed content (webpages, documents, emails) redirect an AI agent away from the user's intent, exploiting the agent's tendency to follow instructions.", plain: "Hidden instructions on a webpage or in a document that trick an AI agent into doing something other than what the user asked.", analogy: "A form field with fine print that changes what you're actually agreeing to — misdirection through embedded instructions." },
+      { id: "safe-to-try-sandbox", term: "Safe-to-try sandbox mode", category: "Agentic UX", technical: "An interface pattern where agents stage or preview actions before execution, requiring human approval before completion — reducing harm from mistakes, bias, or attacks.", plain: "The agent shows you what it's about to do, you review and approve (or reject), then it executes. Like a review step before publish.", analogy: "Design mockup reviews before development — catch mistakes early." },
+      { id: "intent-types", term: "Intent types", category: "Agentic UX", technical: "Four primary user intents in agent-facing interfaces: Informational (learn), Navigational (find), Commercial (evaluate/compare), Transactional (take action) — surface intent input early so agents can skip irrelevant steps.", plain: "Different reasons people come to your site: to learn, to find something, to evaluate options, or to do something. Make it obvious early so agents don't waste time.", analogy: "Information architecture that makes user goals obvious from the top level — homepage groups content by intent, not by content type." },
+      { id: "prerender-ssr", term: "Pre-render / Server-Side Rendering (SSR)", category: "Design Principles", technical: "Delivering fully-rendered HTML server-side rather than relying on client-side JavaScript execution — ensures agents and assistive tech can access critical content without executing JS.", plain: "Your content must be readable without JavaScript running. Agents may not execute it; some users can't. Server-render critical content.", analogy: "Designing for slow networks or no-JavaScript browsers — good for everyone, essential for agents." },
+      { id: "semantic-naming", term: "Semantic naming (tokens)", category: "Design Principles", technical: "Naming design tokens by their functional meaning rather than their visual value — e.g., `button-primary-bg` (what it does) instead of `blue-500` (what it looks like) — enabling scalable remapping across brands and contexts.", plain: "Token names describe PURPOSE not APPEARANCE. `color-warning` means something regardless of whether it's orange or red.", analogy: "The three-tier token architecture — primitives are values, semantics are meaning, components consume semantics." },
+      { id: "heading-hierarchy-structure", term: "Heading hierarchy as structure", category: "Design Principles", technical: "Using HTML heading levels (h1-h6) to define information architecture and relationships rather than for visual styling — agents parse heading hierarchy to understand content relationships and section importance.", plain: "Headings tell agents 'here's the main idea, here's a subtopic, here's a detail under that.' The nesting shows information structure.", analogy: "Outline or table of contents — the visual hierarchy shows readers where things fit. Headings do the same for machines." },
+      { id: "icon-plus-label", term: "Icon + label always", category: "Design Principles", technical: "Never use icon-only controls in agent-facing interfaces — icons are visual; agents need text labels to understand what action is available and what it does.", plain: "An 'X' icon means nothing to an agent. 'Close' + icon means the agent understands the action. Always include text labels.", analogy: "Accessibility best practice — if you wouldn't use icon-only for screen readers, don't use it for agents either." }
     ]
   },
   landscape: {
@@ -678,6 +797,18 @@ function renderTabs() {
   }).join('');
 }
 
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const deck = DECKS[currentDeck];
+  sidebar.innerHTML = `<div class="sidebar-title">${deck.label}</div><div class="card-list">` +
+    deck.cards.map((card, idx) => {
+      const isMastered = mastered[currentDeck].has(idx);
+      const isActive = idx === currentIndex;
+      return `<button class="card-link ${isMastered ? 'mastered' : ''} ${isActive ? 'active' : ''}" onclick="jumpToCard(${idx})">${card.term}</button>`;
+    }).join('') +
+    '</div>';
+}
+
 function renderProgress() {
   const deck = DECKS[currentDeck].cards;
   const m = mastered[currentDeck].size;
@@ -689,6 +820,8 @@ function renderProgress() {
 function renderCard() {
   const deck = DECKS[currentDeck].cards;
   const container = document.getElementById('cardContainer');
+
+  renderSidebar();
 
   if (mastered[currentDeck].size === deck.length) {
     container.innerHTML = `<div class="completion"><div class="completion-mark">✓</div><h2>Deck complete</h2><p>All ${deck.length} cards mastered.</p><button class="nav-btn" onclick="resetDeck()">Start over</button></div>`;
@@ -733,8 +866,8 @@ function renderCard() {
     </div>
     ${isFlipped ? `
     <div class="action-row">
-      <button class="btn" onclick="nextCard(event)">← Still learning</button>
-      <button class="btn btn-mastered" onclick="markMastered(event)">Got it ✓</button>
+      <button class="btn" onclick="toggleMastered(event)">${mastered[currentDeck].has(currentIndex) ? '↶ Mark as learning' : '← Still learning'}</button>
+      <button class="btn btn-mastered" onclick="toggleAndNext(event)">${mastered[currentDeck].has(currentIndex) ? 'Mastered — next →' : 'Got it ✓'}</button>
     </div>` : `<div class="flip-cue">tap card to flip</div>`}
     <div class="nav-row">
       <button class="nav-btn" onclick="prevCard(event)" ${currentIndex === 0 ? 'disabled' : ''}>← Prev</button>
@@ -767,6 +900,28 @@ function prevCard(e) {
   renderCard();
 }
 
+function toggleMastered(e) {
+  if (e) e.stopPropagation();
+  if (mastered[currentDeck].has(currentIndex)) {
+    mastered[currentDeck].delete(currentIndex);
+  } else {
+    mastered[currentDeck].add(currentIndex);
+  }
+  renderProgress();
+  renderTabs();
+  renderCard();
+}
+
+function toggleAndNext(e) {
+  if (e) e.stopPropagation();
+  if (!mastered[currentDeck].has(currentIndex)) {
+    mastered[currentDeck].add(currentIndex);
+    renderProgress();
+    renderTabs();
+  }
+  nextCard(null);
+}
+
 function markMastered(e) {
   if (e) e.stopPropagation();
   mastered[currentDeck].add(currentIndex);
@@ -784,6 +939,13 @@ function resetDeck() {
   renderCard();
 }
 
+function jumpToCard(idx) {
+  currentIndex = idx;
+  isFlipped = false;
+  renderCard();
+  renderSidebar();
+}
+
 function switchDeck(key) {
   currentDeck = key;
   currentIndex = 0;
@@ -791,12 +953,14 @@ function switchDeck(key) {
   renderTabs();
   renderProgress();
   renderCard();
+  renderSidebar();
 }
 
 loadNotes();
 renderTabs();
 renderProgress();
 renderCard();
+renderSidebar();
 </script>
 </body>
 </html>
