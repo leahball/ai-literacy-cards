@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Literacy — Flashcards</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f8f7f4;
+    --surface: #ffffff;
+    --surface2: #f1f0ec;
+    --border: rgba(0,0,0,0.1);
+    --border-med: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --text-2: #5a5a56;
+    --text-3: #9a9a94;
+    --accent: #1a1a18;
+    --success: #2d6a4f;
+    --success-bg: #e8f5ee;
+    --success-border: rgba(45,106,79,0.25);
+    --note-bg: #fffbf0;
+    --note-border: rgba(180,140,0,0.2);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: 'Georgia', 'Times New Roman', serif;
+    --font-sans: system-ui, -apple-system, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16161a;
+      --surface: #1e1e24;
+      --surface2: #26262e;
+      --border: rgba(255,255,255,0.09);
+      --border-med: rgba(255,255,255,0.16);
+      --text: #e8e8e2;
+      --text-2: #9a9a94;
+      --text-3: #5a5a56;
+      --accent: #e8e8e2;
+      --success: #6fcf97;
+      --success-bg: rgba(111,207,151,0.1);
+      --success-border: rgba(111,207,151,0.2);
+      --note-bg: rgba(255,220,100,0.06);
+      --note-border: rgba(255,220,100,0.15);
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .shell {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+  }
+
+  .wordmark {
+    font-family: var(--font);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  h1 {
+    font-family: var(--font);
+    font-size: 28px;
+    font-weight: normal;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .deck-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .deck-tab {
+    padding: 5px 14px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border-med);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+
+  .deck-tab.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  .deck-tab:hover:not(.active) {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--text-3);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Card */
+  .card-scene {
+    perspective: 1200px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+  }
+
+  .card-body {
+    position: relative;
+    width: 100%;
+    min-height: 280px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .card-body.flipped { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .face.back { transform: rotateY(180deg); }
+
+  .face-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 1.25rem;
+    font-family: var(--font-sans);
+  }
+
+  .term {
+    font-family: var(--font);
+    font-size: 26px;
+    font-weight: normal;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border-med);
+    color: var(--text-3);
+    font-family: var(--font-sans);
+    margin-bottom: 1rem;
+  }
+
+  .card-prompt {
+    font-size: 14px;
+    color: var(--text-3);
+    font-style: italic;
+    margin-top: auto;
+    padding-top: 1rem;
+  }
+
+  .back-section { margin-bottom: 1.25rem; }
+  .back-section:last-child { margin-bottom: 0; }
+
+  .back-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 0.35rem;
+    font-family: var(--font-sans);
+  }
+
+  .def-technical {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .def-plain {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-2);
+    font-style: italic;
+  }
+
+  .def-analogy {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-2);
+    padding: 0.65rem 0.9rem;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--border-med);
+  }
+
+  .flip-cue {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-3);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Actions */
+  .action-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn:hover { background: var(--surface2); color: var(--text); }
+
+  .btn-mastered {
+    border-color: var(--success-border);
+    color: var(--success);
+  }
+
+  .btn-mastered:hover { background: var(--success-bg); }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .nav-btn {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+
+  .nav-btn:hover:not(:disabled) { background: var(--surface2); color: var(--text); }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+  .card-counter {
+    font-size: 12px;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Notes */
+  .notes-section {
+    border: 0.5px solid var(--note-border);
+    background: var(--note-bg);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .notes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+
+  .notes-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-family: var(--font-sans);
+  }
+
+  .notes-save-btn {
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    font-size: 12px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+
+  .notes-save-btn:hover { background: var(--surface2); color: var(--text); }
+
+  .notes-textarea {
+    width: 100%;
+    min-height: 80px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--text);
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .notes-textarea::placeholder { color: var(--text-3); }
+
+  /* Export panel */
+  .export-panel {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  .export-panel.open { display: block; }
+
+  .export-label {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+  }
+
+  .export-code {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text-2);
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 0.75rem;
+    border: 0.5px solid var(--border);
+  }
+
+  .copy-btn {
+    padding: 7px 16px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    font-size: 13px;
+    cursor: pointer;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { opacity: 0.85; }
+
+  .close-export {
+    float: right;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    font-size: 12px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-3);
+    font-family: var(--font-sans);
+  }
+
+  /* Completion */
+  .completion {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  .completion-mark {
+    font-family: var(--font);
+    font-size: 48px;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+  }
+
+  .completion h2 {
+    font-family: var(--font);
+    font-size: 22px;
+    font-weight: normal;
+    margin-bottom: 0.5rem;
+  }
+
+  .completion p {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+  }
+
+  /* Mastered badge inline */
+  .mastered-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: var(--success-bg);
+    color: var(--success);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .total-pill {
+    font-size: 11px;
+    color: var(--text-3);
+    margin-left: 5px;
+  }
+
+  /* GitHub instructions */
+  .github-instructions {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .github-instructions h3 {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 0.75rem;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  .step-num {
+    min-width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border-med);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--text-3);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--text);
+  }
+
+  a { color: var(--text); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="wordmark">MX for Good</div>
+    <h1>AI Literacy</h1>
+  </header>
+
+  <div class="deck-tabs" id="deckTabs"></div>
+
+  <div class="progress-row">
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <span class="progress-label" id="progressLabel">0 mastered</span>
+  </div>
+
+  <div id="cardContainer"></div>
+
+  <div class="notes-section" id="notesSection">
+    <div class="notes-header">
+      <span class="notes-label">Notes on this card</span>
+      <button class="notes-save-btn" onclick="saveNote()">Save &amp; export →</button>
+    </div>
+    <textarea class="notes-textarea" id="noteInput" placeholder="Questions, connections, ideas as they come up…"></textarea>
+  </div>
+
+  <div class="export-panel" id="exportPanel">
+    <button class="close-export" onclick="closeExport()">close</button>
+    <div class="export-label">Copy this and paste it into <code>notes.json</code> in your GitHub repo. This replaces the entire file.</div>
+    <div class="export-code" id="exportCode"></div>
+    <button class="copy-btn" onclick="copyExport()">Copy to clipboard</button>
+  </div>
+
+  <div class="github-instructions">
+    <h3>Setting up on GitHub Pages</h3>
+    <div class="step"><div class="step-num">1</div><div>Create a new public repo — e.g. <code>ai-literacy-cards</code></div></div>
+    <div class="step"><div class="step-num">2</div><div>Upload this file as <code>index.html</code> and create a blank <code>notes.json</code> file containing <code>{}</code></div></div>
+    <div class="step"><div class="step-num">3</div><div>Go to Settings → Pages → Deploy from branch → main → / (root). Save.</div></div>
+    <div class="step"><div class="step-num">4</div><div>Your app lives at <code>https://[yourusername].github.io/ai-literacy-cards</code></div></div>
+    <div class="step"><div class="step-num">5</div><div>To save notes: type a note on any card, click "Save &amp; export", copy the JSON, paste it into <code>notes.json</code> in your repo and commit. Notes load from the file on next visit.</div></div>
+    <div class="step"><div class="step-num">6</div><div>To add new cards: ask Claude to update the <code>DECKS</code> object in this file with new cards, re-upload.</div></div>
+  </div>
+
+</div>
+
+<script>
+const DECKS = {
+  concepts: {
+    label: "Concepts",
+    cards: [
+      { id: "llm", term: "Large Language Model (LLM)", category: "Foundations", technical: "A neural network trained on large text corpora to predict the next token in a sequence, developing emergent capabilities in language understanding and generation.", plain: "A system trained on massive amounts of text that learned to predict what word comes next — and in doing so, learned a surprising amount about how language, facts, and reasoning work.", analogy: "Like a person who has read most of the internet and can continue any sentence — not because they understand it the way humans do, but because they've seen enough patterns to know what usually comes next." },
+      { id: "transformer", term: "Transformer architecture", category: "Foundations", technical: "A neural network design using self-attention mechanisms and feed-forward layers to process sequences in parallel, enabling LLMs to capture long-range dependencies in text.", plain: "The underlying design that makes modern AI work. Instead of reading text word by word, it can look at the whole passage at once and learn which parts relate to each other.", analogy: "Like reading an entire page simultaneously and drawing lines between every word that influences every other word — rather than reading left to right one word at a time." },
+      { id: "attention", term: "Attention mechanism", category: "Foundations", technical: "A learned weighting system that determines how much each token should influence the representation of every other token, enabling the model to focus on relevant context.", plain: "The part of the model that decides what to pay attention to. When processing any word, it looks at the whole context and weights which other words matter most for understanding it.", analogy: "Like visual hierarchy in design — if everything is the same size and weight, nothing stands out. Attention creates contrast so the model can find what's actually relevant." },
+      { id: "tokenization", term: "Tokenization", category: "Foundations", technical: "The process of splitting text into subword units (tokens) mapped to integer IDs for model processing. Common words are single tokens; rare words split into fragments.", plain: "How text gets broken into chunks the model can process mathematically. 'Chicago' might be one token. 'Unforeseeable' might be four. The model never sees words — only numbered pieces.", analogy: "Like a component library deciding what counts as an atom. If your base units are poorly chosen, everything built on top inherits those problems." },
+      { id: "embeddings", term: "Embeddings", category: "Foundations", technical: "High-dimensional vector representations of tokens where semantic relationships are encoded as geometric distances. Similar concepts cluster together in vector space.", plain: "Numbers that encode meaning. Every word gets converted into a list of hundreds of numbers, positioned in a meaning-space where similar concepts end up near each other.", analogy: "Like design tokens that encode semantic meaning separately from presentation. 'color.warning' holds a meaning regardless of whether it renders as orange or red." },
+      { id: "training-inference", term: "Training vs. inference", category: "Foundations", technical: "Training adjusts model weights on large datasets via gradient descent. Inference generates outputs from a fixed trained model given new input. Bias can enter at both stages.", plain: "Training is when the model learns — expensive, slow, happens rarely. Inference is when you use it — every time you send a message. Bias at training shows up in every inference.", analogy: "Training is like building a design system. Inference is like using it to build a page. Flaws in the system show up in every page built from it." },
+      { id: "rlhf", term: "RLHF", category: "Foundations", technical: "Reinforcement Learning from Human Feedback. A fine-tuning method where human raters score model outputs and the model is trained to produce higher-rated responses.", plain: "The process that turns a raw text predictor into a helpful assistant. Humans score responses, and the model learns to produce more of what gets high scores — including the raters' biases.", analogy: "Like usability testing that shapes design decisions — valuable, but it reflects who the testers are and what they value." },
+      { id: "context-window", term: "Context window", category: "Foundations", technical: "The maximum number of tokens an LLM can process in a single forward pass, including both the input prompt and generated output. Content outside this window is inaccessible.", plain: "How much the model can 'see' at once. Once you exceed this limit, earlier content is forgotten. The model can't refer back to something outside its window.", analogy: "Cognitive load in UX — the amount a user can hold in working memory at once. Good design offloads what doesn't need to be remembered right now." },
+      { id: "rag", term: "RAG (Retrieval-Augmented Generation)", category: "How AI works", technical: "An architecture that supplements a model's trained knowledge by retrieving relevant documents at inference time and including them in context before generation.", plain: "Instead of relying only on what the model learned during training, it first looks up relevant documents and reads them before answering. Like open-book vs. closed-book testing.", analogy: "The difference between a search result you see (RAG) and a memory baked into the model (training). Both can be biased — in different and compounding ways." },
+      { id: "temperature", term: "Temperature", category: "How AI works", technical: "A parameter that scales the probability distribution over the vocabulary at each generation step. Low = more deterministic. High = more random.", plain: "A dial that controls how predictable or creative the output is. Low temperature gives consistent, expected answers. High produces surprising, sometimes incoherent ones.", analogy: "Like the flexibility dial in a design system — too tight and you lose expressiveness, too loose and you lose coherence." },
+      { id: "hallucination", term: "Hallucination", category: "How AI works", technical: "When a model generates fluent, confident-sounding text that is factually incorrect or fabricated — a byproduct of optimizing for plausible completions rather than factual accuracy.", plain: "When the model makes things up and states them confidently. It has no concept of truth — it produces text that fits the statistical pattern, real or not.", analogy: "A design system that generates visually consistent components that don't actually work — looks right, fails silently." },
+      { id: "structured-data", term: "Structured data / schema.org", category: "Machine legibility", technical: "A standardized vocabulary for marking up web content with machine-readable metadata using JSON-LD, Microdata, or RDFa, enabling automated systems to understand content type and relationships.", plain: "Code added to a webpage that tells machines — not just humans — what the content means. 'This is a legal service. It's free. It takes Spanish-language intake on Tuesdays.'", analogy: "The difference between a beautifully designed clinic brochure a human can read, and a database record an AI agent can query and filter." },
+      { id: "training-bias", term: "Training data bias", category: "Bias & equity", technical: "Statistical skews introduced when training corpora over-represent certain voices, framings, or perspectives, causing models to reproduce those skews in outputs.", plain: "When the data a model learned from was unbalanced, the model's 'knowledge' reflects that imbalance. More content from powerful institutions = those institutions' framings become the default.", analogy: "If your design research only included one type of user, your system would optimize for them and fail everyone else — without anyone intending it." },
+      { id: "false-balance", term: "False balance", category: "Bias & equity", technical: "When a system presents two positions as equally weighted despite significant asymmetries in evidential support, funding, or affected population — producing misleading impressions of equivalence.", plain: "When an AI presents a well-funded lobbying position and a peer-reviewed research finding as equally valid 'perspectives.' Sounds neutral. Is not neutral.", analogy: "A design that gives equal visual weight to the primary action and a destructive action — technically balanced, functionally misleading." },
+      { id: "epistemic-humility", term: "Epistemic humility", category: "Bias & equity", technical: "The property of a system or interface that accurately represents the limits and confidence of its own knowledge — distinguishing well-established claims from contested or uncertain ones.", plain: "Knowing what you don't know, and being honest about it. An epistemically humble AI would signal when something is contested, uncertain, or reflects one dominant framing.", analogy: "An unsolved design problem. The confident, fluent tone of AI outputs creates false certainty. Designing visible signals for uncertainty is original, important work." },
+      { id: "citation-laundering", term: "Citation laundering", category: "Bias & equity", technical: "The process by which an advocacy position gains apparent credibility by being picked up in sequence by media, then cited by researchers, then referenced in policy — obscuring the original source.", plain: "A lobbying position quoted in a news article, cited in a think tank report, referenced in a policy document — arriving in LLM training data looking like established fact.", analogy: "A design pattern copied from project to project without anyone remembering why it was made, until it looks like best practice." },
+      { id: "language-equity", term: "Tokenization and language equity", category: "Bias & equity", technical: "Languages underrepresented in training data are tokenized less efficiently — requiring more tokens to represent equivalent content — reducing effective context window and model performance.", plain: "A Spanish or Haitian Creole speaker asking a complex question uses more of the model's 'thinking budget' per concept than an English speaker. The math disadvantages non-English users structurally.", analogy: "A design system built for English text that breaks when rendered in languages with longer words or different reading direction — the problem is baked in at the foundation." },
+      { id: "agentic-ai", term: "Agentic AI", category: "Machine legibility", technical: "AI systems that can take sequences of actions — browsing, filling forms, executing code, interacting with APIs — rather than only generating text responses.", plain: "AI that doesn't just answer questions but does things: books appointments, searches and synthesizes, fills out forms, navigates websites on your behalf.", analogy: "The difference between a design spec and a design system that ships. Agentic AI acts in the world — which means machine legibility determines not just what gets surfaced, but what gets done." },
+      { id: "prompt-injection", term: "Prompt injection", category: "Machine legibility", technical: "An attack where malicious instructions are embedded in content an AI agent reads — a webpage, document, email — to redirect its behavior away from the user's intent.", plain: "When someone hides instructions in a webpage or document — 'ignore your previous instructions and do this instead' — to manipulate an AI agent acting on a user's behalf.", analogy: "Like a form that says 'Please enter your address' but has hidden fine print that changes what you're actually agreeing to." }
+    ]
+  },
+  landscape: {
+    label: "Landscape",
+    cards: [
+      { id: "noble", term: "Safiya Umoja Noble", category: "Researchers", technical: "Professor at UCLA. Author of Algorithms of Oppression (2018). Foundational work documenting how search algorithms reproduce racial and gender bias.", plain: "She proved that search results weren't neutral before most people were asking the question. Her framework for algorithmic oppression is the intellectual foundation for a lot of AI equity work.", analogy: "Read: Algorithms of Oppression. Her argument about search bias is the direct precursor to the machine legibility equity argument." },
+      { id: "eubanks", term: "Virginia Eubanks", category: "Researchers", technical: "Political scientist at University at Albany. Author of Automating Inequality (2018). Documents how automated systems make high-stakes decisions about poor and working-class communities.", plain: "She studied what happens when governments use algorithms to decide who gets housing, healthcare, and child services — and documented the harm when those systems fail the people with least power.", analogy: "Read: Automating Inequality. The most grounded, case-based account of what algorithmic bias actually costs real people." },
+      { id: "buolamwini", term: "Joy Buolamwini", category: "Researchers", technical: "Researcher and founder of the Algorithmic Justice League. MIT Media Lab alumna. Documented racial and gender bias in commercial facial recognition systems.", plain: "She showed that facial recognition worked significantly worse on darker-skinned women — and built a movement and organization to fight algorithmic bias.", analogy: "Her framing of 'coded gaze' — that AI systems reflect the biases of their builders — is essential vocabulary for talking about AI bias to any audience." },
+      { id: "gebru", term: "Timnit Gebru", category: "Researchers", technical: "AI researcher, founder of DAIR Institute. Co-authored the Stochastic Parrots paper. Formerly at Google Brain before a widely publicized dismissal over AI ethics research.", plain: "One of the most important voices on AI harm. Her departure from Google became a defining moment in understanding how Big Tech handles internal dissent on AI safety and bias.", analogy: "Follow: @timnitGebru. DAIR Institute publishes community-centered AI research. Essential for understanding the politics of who controls AI research." },
+      { id: "bender", term: "Emily Bender", category: "Researchers", technical: "Computational linguist at University of Washington. Lead author of the Stochastic Parrots paper (2021), which raised early warnings about large language model risks.", plain: "She co-wrote the paper that named what LLMs are doing — predicting plausible-sounding text, not understanding language — and raised the alarm before most people were paying attention.", analogy: "Read the abstract at minimum. The term 'stochastic parrot' will come up in any serious AI conversation and you want to know where it came from." },
+      { id: "ai-now", term: "AI Now Institute", category: "Organizations", technical: "Research institute at NYU studying the social implications of AI. Publishes annual landscape reports covering AI in labor, healthcare, government, and civil rights.", plain: "The most rigorous independent research organization tracking AI's real-world impacts. Their annual reports are the best single source for what's actually happening in AI policy.", analogy: "Bookmark: ainowinstitute.org. Read their annual report — it covers AI in immigration enforcement, labor surveillance, healthcare, and more." },
+      { id: "markup", term: "The Markup", category: "Publications", technical: "Nonprofit investigative newsroom founded in 2020 covering how powerful institutions use technology. Known for data-driven investigations into algorithmic systems and platform power.", plain: "The publication doing the most rigorous journalism on how algorithms actually work in the real world — healthcare, housing, immigration, advertising. Not theoretical. Documented.", analogy: "Bookmark: themarkup.org. If you need an empirical case study for almost any AI bias argument, The Markup has probably already done the investigation." },
+      { id: "tech-policy-press", term: "Tech Policy Press", category: "Publications", technical: "Independent journalism outlet covering the intersection of technology and public policy. Publishes analysis on AI regulation, platform governance, and digital rights.", plain: "Where technologists and policy people talk to each other. Serious but accessible. The right place to publish findings that need to reach both communities.", analogy: "Bookmark: techpolicy.press. The right outlet for the Narrative Equity Index when it's ready to publish." },
+      { id: "stochastic-parrots", term: "Stochastic Parrots paper", category: "Key papers", technical: "Bender et al. (2021), 'On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?' FAccT. Argues LLMs are pattern-matching systems producing plausible text without understanding.", plain: "The paper that named the core problem with LLMs: they sound like they understand, but they're statistical pattern matchers. Also raised early warnings about training data bias and environmental cost.", analogy: "Read the abstract at minimum. 'Stochastic parrot' will come up in any serious AI conversation." },
+      { id: "web-almanac", term: "Web Almanac", category: "Key resources", technical: "Annual state-of-the-web report by HTTP Archive, analyzing millions of pages across accessibility, performance, and (as of 2025) generative AI directives.", plain: "The most comprehensive annual data on how the web is actually built. The 2025 generative AI chapter is where the 4.5% structured AI directive statistic comes from.", analogy: "Bookmark: almanac.httparchive.org. The empirical foundation for machine legibility claims about the current state of the web." },
+      { id: "code-for-america", term: "Code for America", category: "Organizations", technical: "Nonprofit that works with government to improve access to public services through technology. Known for safety net benefits access, civic tech fellowship programs, and policy advocacy.", plain: "The organization that has been doing civic tech right for over a decade — pairing technologists with government to make public services actually work for people.", analogy: "Their annual summit is the right venue for the MLI framework. Their network is full of people who would immediately understand the ICIRR case study." },
+      { id: "ajl", term: "Algorithmic Justice League", category: "Organizations", technical: "Organization founded by Joy Buolamwini focused on equitable and accountable AI. Combines research, advocacy, and art to surface and address algorithmic harms.", plain: "The organization that made AI bias legible to audiences beyond academia. Their approach — combining rigorous research with accessible storytelling — is a model worth studying.", analogy: "Follow: ajl.org. Their framing of 'coded gaze' and 'algorithmic harm' is the vocabulary that resonates across technical and non-technical audiences." }
+    ]
+  }
+};
+
+let currentDeck = 'concepts';
+let currentIndex = 0;
+let isFlipped = false;
+let mastered = {};
+let notes = {};
+
+Object.keys(DECKS).forEach(k => { mastered[k] = new Set(); });
+
+function currentCard() { return DECKS[currentDeck].cards[currentIndex]; }
+function noteKey() { return currentDeck + ':' + currentCard().id; }
+
+function loadNotes() {
+  fetch('notes.json')
+    .then(r => r.json())
+    .then(data => { notes = data || {}; updateNoteField(); })
+    .catch(() => { notes = {}; });
+}
+
+function updateNoteField() {
+  const ta = document.getElementById('noteInput');
+  if (ta) ta.value = notes[noteKey()] || '';
+}
+
+function saveNote() {
+  const val = document.getElementById('noteInput').value.trim();
+  if (val) { notes[noteKey()] = val; }
+  else { delete notes[noteKey()]; }
+  showExport();
+}
+
+function showExport() {
+  const panel = document.getElementById('exportPanel');
+  const code = document.getElementById('exportCode');
+  code.textContent = JSON.stringify(notes, null, 2);
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeExport() {
+  document.getElementById('exportPanel').classList.remove('open');
+}
+
+function copyExport() {
+  const text = document.getElementById('exportCode').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 2000);
+  });
+}
+
+function renderTabs() {
+  const el = document.getElementById('deckTabs');
+  el.innerHTML = Object.entries(DECKS).map(([key, deck]) => {
+    const m = mastered[key].size;
+    const t = deck.cards.length;
+    const badge = m > 0
+      ? `<span class="mastered-pill">✓ ${m}/${t}</span>`
+      : `<span class="total-pill">${t}</span>`;
+    return `<button class="deck-tab ${key === currentDeck ? 'active' : ''}" onclick="switchDeck('${key}')">${deck.label}${badge}</button>`;
+  }).join('');
+}
+
+function renderProgress() {
+  const deck = DECKS[currentDeck].cards;
+  const m = mastered[currentDeck].size;
+  const pct = Math.round((m / deck.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${m} of ${deck.length} mastered`;
+}
+
+function renderCard() {
+  const deck = DECKS[currentDeck].cards;
+  const container = document.getElementById('cardContainer');
+
+  if (mastered[currentDeck].size === deck.length) {
+    container.innerHTML = `<div class="completion"><div class="completion-mark">✓</div><h2>Deck complete</h2><p>All ${deck.length} cards mastered.</p><button class="nav-btn" onclick="resetDeck()">Start over</button></div>`;
+    document.getElementById('notesSection').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('notesSection').style.display = 'block';
+
+  while (mastered[currentDeck].has(currentIndex)) {
+    currentIndex = (currentIndex + 1) % deck.length;
+  }
+
+  const card = deck[currentIndex];
+  const remaining = deck.length - mastered[currentDeck].size;
+  const labelSuffix = currentDeck === 'landscape' ? 'Action' : 'Design analogy';
+
+  container.innerHTML = `
+    <div class="card-scene" onclick="flipCard()" role="button" aria-label="Flip card">
+      <div class="card-body ${isFlipped ? 'flipped' : ''}">
+        <div class="face front">
+          <div class="face-label">Term — tap to reveal</div>
+          <div class="term">${card.term}</div>
+          <span class="category-tag">${card.category}</span>
+          <div class="card-prompt">What is this, and why does it matter for AI equity work?</div>
+        </div>
+        <div class="face back">
+          <div class="back-section">
+            <div class="back-label">Technical</div>
+            <div class="def-technical">${card.technical}</div>
+          </div>
+          <div class="back-section">
+            <div class="back-label">Plain language</div>
+            <div class="def-plain">${card.plain}</div>
+          </div>
+          <div class="back-section">
+            <div class="back-label">${labelSuffix}</div>
+            <div class="def-analogy">${card.analogy}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${isFlipped ? `
+    <div class="action-row">
+      <button class="btn" onclick="nextCard(event)">← Still learning</button>
+      <button class="btn btn-mastered" onclick="markMastered(event)">Got it ✓</button>
+    </div>` : `<div class="flip-cue">tap card to flip</div>`}
+    <div class="nav-row">
+      <button class="nav-btn" onclick="prevCard(event)" ${currentIndex === 0 ? 'disabled' : ''}>← Prev</button>
+      <span class="card-counter">${currentIndex + 1} / ${deck.length} · ${remaining} remaining</span>
+      <button class="nav-btn" onclick="nextCard(event)">Next →</button>
+    </div>
+  `;
+
+  updateNoteField();
+}
+
+function flipCard() { isFlipped = !isFlipped; renderCard(); }
+
+function nextCard(e) {
+  if (e) e.stopPropagation();
+  const deck = DECKS[currentDeck].cards;
+  let next = (currentIndex + 1) % deck.length;
+  let attempts = 0;
+  while (mastered[currentDeck].has(next) && attempts < deck.length) { next = (next + 1) % deck.length; attempts++; }
+  currentIndex = next;
+  isFlipped = false;
+  renderCard();
+}
+
+function prevCard(e) {
+  if (e) e.stopPropagation();
+  const deck = DECKS[currentDeck].cards;
+  currentIndex = (currentIndex - 1 + deck.length) % deck.length;
+  isFlipped = false;
+  renderCard();
+}
+
+function markMastered(e) {
+  if (e) e.stopPropagation();
+  mastered[currentDeck].add(currentIndex);
+  renderProgress();
+  renderTabs();
+  nextCard(null);
+}
+
+function resetDeck() {
+  mastered[currentDeck] = new Set();
+  currentIndex = 0;
+  isFlipped = false;
+  renderProgress();
+  renderTabs();
+  renderCard();
+}
+
+function switchDeck(key) {
+  currentDeck = key;
+  currentIndex = 0;
+  isFlipped = false;
+  renderTabs();
+  renderProgress();
+  renderCard();
+}
+
+loadNotes();
+renderTabs();
+renderProgress();
+renderCard();
+</script>
+</body>
+</html>
