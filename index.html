@@ -1172,10 +1172,6 @@ function renderQuiz() {
 
   document.getElementById('notesSection').style.display = 'none';
 
-  while (mastered[currentDeck].has(deck[currentIndex].id)) {
-    currentIndex = (currentIndex + 1) % deck.length;
-  }
-
   if (!quizQuestion || quizQuestion.card.id !== deck[currentIndex].id) buildQuizQuestion();
 
   const { card, options, selected } = quizQuestion;
@@ -1271,10 +1267,6 @@ function renderCard() {
   }
 
   document.getElementById('notesSection').style.display = 'block';
-
-  while (mastered[currentDeck].has(deck[currentIndex].id)) {
-    currentIndex = (currentIndex + 1) % deck.length;
-  }
 
   const card = deck[currentIndex];
   const isMastered = mastered[currentDeck].has(card.id);
