@@ -55,6 +55,7 @@
     display: flex;
   }
 
+  /* Sidebar */
   .sidebar {
     width: 220px;
     background: var(--surface);
@@ -63,6 +64,15 @@
     overflow-y: auto;
     max-height: 100vh;
     flex-shrink: 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
   }
 
   .sidebar-title {
@@ -71,8 +81,20 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-3);
-    margin-bottom: 1rem;
   }
+
+  .sidebar-toggle-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-3);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .sidebar-toggle-btn:hover { color: var(--text); }
 
   .card-list {
     display: flex;
@@ -94,6 +116,9 @@
     line-height: 1.4;
     position: relative;
     padding-left: 24px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
   }
 
   .card-link::before {
@@ -106,6 +131,7 @@
     height: 8px;
     border-radius: 50%;
     background: var(--border);
+    flex-shrink: 0;
   }
 
   .card-link.mastered::before {
@@ -121,21 +147,15 @@
     border-radius: 50%;
   }
 
-  .card-link:hover {
-    background: var(--surface2);
-    color: var(--text);
-  }
+  .card-link:hover { background: var(--surface2); color: var(--text); }
+  .card-link.active { background: var(--surface2); border-color: var(--border-med); color: var(--text); }
 
-  .card-link.active {
-    background: var(--surface2);
-    border-color: var(--border-med);
-    color: var(--text);
-  }
-
+  /* Main */
   .main-content {
     flex: 1;
     padding: 2rem 1rem;
     overflow-y: auto;
+    min-width: 0;
   }
 
   .shell {
@@ -143,15 +163,48 @@
     margin: 0 auto;
   }
 
-  @media (max-width: 768px) {
-    body { flex-direction: column; }
-    .sidebar { width: 100%; max-height: auto; border-right: none; border-bottom: 0.5px solid var(--border); padding: 1.5rem 1rem; }
-    .main-content { padding: 2rem 1rem; }
+  /* Header */
+  header { margin-bottom: 2rem; }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
-  header {
-    margin-bottom: 2.5rem;
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    padding-top: 2px;
   }
+
+  .sync-status {
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: var(--font-sans);
+    transition: opacity 0.3s;
+  }
+
+  .sync-status.error { color: #c0392b; }
+  .sync-status.saved { color: var(--success); }
+
+  .icon-btn {
+    background: transparent;
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-sm);
+    color: var(--text-3);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 5px 8px;
+    line-height: 1;
+    transition: all 0.15s;
+    font-family: var(--font-sans);
+  }
+
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
 
   .wordmark {
     font-family: var(--font);
@@ -170,6 +223,98 @@
     line-height: 1.2;
   }
 
+  /* Settings panel */
+  .settings-panel {
+    background: var(--surface);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  .settings-panel.open { display: block; }
+
+  .settings-title {
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: normal;
+    margin-bottom: 0.35rem;
+  }
+
+  .settings-desc {
+    font-size: 12px;
+    color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .settings-desc a { color: var(--text-2); }
+
+  .settings-row {
+    margin-bottom: 0.75rem;
+  }
+
+  .settings-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    display: block;
+    margin-bottom: 0.35rem;
+    font-family: var(--font-sans);
+  }
+
+  .settings-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .settings-input:focus { border-color: var(--accent); }
+
+  .settings-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  .settings-btn {
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-med);
+    font-size: 13px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-2);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+
+  .settings-btn:hover { background: var(--surface2); color: var(--text); }
+  .settings-btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .settings-btn.primary:hover { opacity: 0.85; }
+  .settings-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .settings-feedback {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 0.75rem;
+    line-height: 1.5;
+  }
+
+  .settings-feedback.ok { color: var(--success); }
+  .settings-feedback.err { color: #c0392b; }
+
+  /* Deck tabs */
   .deck-tabs {
     display: flex;
     gap: 6px;
@@ -187,19 +332,13 @@
     color: var(--text-2);
     font-family: var(--font-sans);
     transition: all 0.15s;
+    min-height: 32px;
   }
 
-  .deck-tab.active {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-  }
+  .deck-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .deck-tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
 
-  .deck-tab:hover:not(.active) {
-    background: var(--surface2);
-    color: var(--text);
-  }
-
+  /* Progress */
   .progress-row {
     display: flex;
     align-items: center;
@@ -237,9 +376,8 @@
   }
 
   .card-body {
-    position: relative;
+    display: grid;
     width: 100%;
-    min-height: 280px;
     transform-style: preserve-3d;
     transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
   }
@@ -247,8 +385,9 @@
   .card-body.flipped { transform: rotateY(180deg); }
 
   .face {
-    position: absolute;
-    inset: 0;
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 280px;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     border-radius: var(--radius);
@@ -311,19 +450,8 @@
     font-family: var(--font-sans);
   }
 
-  .def-technical {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--text);
-  }
-
-  .def-plain {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--text-2);
-    font-style: italic;
-  }
-
+  .def-technical { font-size: 14px; line-height: 1.7; color: var(--text); }
+  .def-plain { font-size: 14px; line-height: 1.7; color: var(--text-2); font-style: italic; }
   .def-analogy {
     font-size: 13px;
     line-height: 1.65;
@@ -334,23 +462,14 @@
     border-left: 2px solid var(--border-med);
   }
 
-  .flip-cue {
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-3);
-    margin-bottom: 0.75rem;
-  }
+  .flip-cue { text-align: center; font-size: 12px; color: var(--text-3); margin-bottom: 0.75rem; }
 
   /* Actions */
-  .action-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 1rem;
-  }
+  .action-row { display: flex; gap: 8px; margin-bottom: 1rem; }
 
   .btn {
     flex: 1;
-    padding: 10px 12px;
+    padding: 12px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--border-med);
     font-size: 13px;
@@ -363,15 +482,11 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    min-height: 44px;
   }
 
   .btn:hover { background: var(--surface2); color: var(--text); }
-
-  .btn-mastered {
-    border-color: var(--success-border);
-    color: var(--success);
-  }
-
+  .btn-mastered { border-color: var(--success-border); color: var(--success); }
   .btn-mastered:hover { background: var(--success-bg); }
 
   .nav-row {
@@ -382,7 +497,7 @@
   }
 
   .nav-btn {
-    padding: 7px 14px;
+    padding: 10px 16px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--border);
     font-size: 13px;
@@ -391,16 +506,13 @@
     color: var(--text-2);
     font-family: var(--font-sans);
     transition: all 0.15s;
+    min-height: 44px;
   }
 
   .nav-btn:hover:not(:disabled) { background: var(--surface2); color: var(--text); }
   .nav-btn:disabled { opacity: 0.25; cursor: default; }
 
-  .card-counter {
-    font-size: 12px;
-    color: var(--text-3);
-    font-variant-numeric: tabular-nums;
-  }
+  .card-counter { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
 
   /* Notes */
   .notes-section {
@@ -427,7 +539,7 @@
   }
 
   .notes-save-btn {
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: var(--radius-sm);
     border: 0.5px solid var(--border-med);
     font-size: 12px;
@@ -436,6 +548,7 @@
     color: var(--text-2);
     font-family: var(--font-sans);
     transition: all 0.15s;
+    min-height: 36px;
   }
 
   .notes-save-btn:hover { background: var(--surface2); color: var(--text); }
@@ -455,93 +568,13 @@
 
   .notes-textarea::placeholder { color: var(--text-3); }
 
-  /* Export panel */
-  .export-panel {
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    display: none;
-  }
-
-  .export-panel.open { display: block; }
-
-  .export-label {
-    font-size: 12px;
-    color: var(--text-2);
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
-  }
-
-  .export-code {
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 0.75rem;
-    white-space: pre-wrap;
-    word-break: break-all;
-    color: var(--text-2);
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 0.75rem;
-    border: 0.5px solid var(--border);
-  }
-
-  .copy-btn {
-    padding: 7px 16px;
-    border-radius: var(--radius-sm);
-    border: 0.5px solid var(--border-med);
-    font-size: 13px;
-    cursor: pointer;
-    background: var(--accent);
-    color: var(--bg);
-    font-family: var(--font-sans);
-    transition: all 0.15s;
-  }
-
-  .copy-btn:hover { opacity: 0.85; }
-
-  .close-export {
-    float: right;
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
-    border: 0.5px solid var(--border);
-    font-size: 12px;
-    cursor: pointer;
-    background: transparent;
-    color: var(--text-3);
-    font-family: var(--font-sans);
-  }
-
   /* Completion */
-  .completion {
-    text-align: center;
-    padding: 4rem 1rem;
-  }
+  .completion { text-align: center; padding: 4rem 1rem; }
+  .completion-mark { font-family: var(--font); font-size: 48px; color: var(--text-3); margin-bottom: 1rem; }
+  .completion h2 { font-family: var(--font); font-size: 22px; font-weight: normal; margin-bottom: 0.5rem; }
+  .completion p { font-size: 14px; color: var(--text-2); margin-bottom: 1.5rem; }
 
-  .completion-mark {
-    font-family: var(--font);
-    font-size: 48px;
-    color: var(--text-3);
-    margin-bottom: 1rem;
-  }
-
-  .completion h2 {
-    font-family: var(--font);
-    font-size: 22px;
-    font-weight: normal;
-    margin-bottom: 0.5rem;
-  }
-
-  .completion p {
-    font-size: 14px;
-    color: var(--text-2);
-    margin-bottom: 1.5rem;
-  }
-
-  /* Mastered badge inline */
+  /* Badges */
   .mastered-pill {
     display: inline-flex;
     align-items: center;
@@ -555,51 +588,7 @@
     vertical-align: middle;
   }
 
-  .total-pill {
-    font-size: 11px;
-    color: var(--text-3);
-    margin-left: 5px;
-  }
-
-  /* GitHub instructions */
-  .github-instructions {
-    border: 0.5px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    padding: 1.5rem;
-    margin-top: 2rem;
-  }
-
-  .github-instructions h3 {
-    font-family: var(--font);
-    font-size: 16px;
-    font-weight: normal;
-    margin-bottom: 1rem;
-    color: var(--text);
-  }
-
-  .step {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 0.75rem;
-    font-size: 13px;
-    color: var(--text-2);
-    line-height: 1.6;
-  }
-
-  .step-num {
-    min-width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 0.5px solid var(--border-med);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    color: var(--text-3);
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
+  .total-pill { font-size: 11px; color: var(--text-3); margin-left: 5px; }
 
   code {
     font-family: 'Courier New', monospace;
@@ -611,19 +600,92 @@
   }
 
   a { color: var(--text); }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+
+    .sidebar {
+      width: 100%;
+      max-height: none;
+      border-right: none;
+      border-bottom: 0.5px solid var(--border);
+      padding: 1rem;
+      position: static;
+      overflow: hidden;
+    }
+
+    .sidebar-toggle-btn { display: block; }
+
+    .card-list { display: none; }
+    .card-list.open { display: flex; margin-top: 0.75rem; }
+
+    .main-content { padding: 1.25rem 1rem; }
+
+    h1 { font-size: 22px; }
+
+    .term { font-size: 22px; }
+
+    .face { padding: 1.5rem; }
+
+    .action-row { flex-direction: column; }
+
+    .btn { min-height: 48px; font-size: 15px; }
+
+    .nav-btn { min-height: 48px; font-size: 15px; padding: 10px 20px; }
+
+    .settings-actions { flex-direction: column; }
+    .settings-btn { width: 100%; justify-content: center; text-align: center; }
+  }
 </style>
 </head>
 <body>
 
-<div class="sidebar" id="sidebar"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title" id="sidebarTitle">Cards</div>
+    <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()">▼</button>
+  </div>
+  <div class="card-list" id="cardList"></div>
+</div>
 
 <div class="main-content">
 <div class="shell">
 
   <header>
-    <div class="wordmark">MX for Good</div>
-    <h1>AI Literacy</h1>
+    <div class="header-top">
+      <div>
+        <div class="wordmark">MX for Good</div>
+        <h1>AI Literacy</h1>
+      </div>
+      <div class="header-actions">
+        <span class="sync-status" id="syncStatus"></span>
+        <button class="icon-btn" onclick="toggleSettings()" title="Sync settings">⚙</button>
+      </div>
+    </div>
   </header>
+
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-title">Sync settings</div>
+    <div class="settings-desc">
+      Your progress syncs to a private GitHub Gist. You need a GitHub
+      <a href="https://github.com/settings/tokens/new?scopes=gist&description=AI+Literacy+Cards" target="_blank">personal access token</a>
+      with <code>gist</code> scope only.
+    </div>
+    <div class="settings-row">
+      <label class="settings-label">GitHub token</label>
+      <input class="settings-input" type="password" id="tokenInput" placeholder="ghp_…" autocomplete="off">
+    </div>
+    <div class="settings-row">
+      <label class="settings-label">Gist ID <span style="font-weight:normal;text-transform:none;letter-spacing:0">(leave blank to create one)</span></label>
+      <input class="settings-input" type="text" id="gistIdInput" placeholder="auto-filled after first save">
+    </div>
+    <div class="settings-actions">
+      <button class="settings-btn primary" id="saveSettingsBtn" onclick="handleSaveSettings()">Save &amp; sync</button>
+      <button class="settings-btn" onclick="toggleSettings()">Cancel</button>
+    </div>
+    <div class="settings-feedback" id="settingsFeedback"></div>
+  </div>
 
   <div class="deck-tabs" id="deckTabs"></div>
 
@@ -639,26 +701,9 @@
   <div class="notes-section" id="notesSection">
     <div class="notes-header">
       <span class="notes-label">Notes on this card</span>
-      <button class="notes-save-btn" onclick="saveNote()">Save &amp; export →</button>
+      <button class="notes-save-btn" onclick="saveNote()">Save note</button>
     </div>
     <textarea class="notes-textarea" id="noteInput" placeholder="Questions, connections, ideas as they come up…"></textarea>
-  </div>
-
-  <div class="export-panel" id="exportPanel">
-    <button class="close-export" onclick="closeExport()">close</button>
-    <div class="export-label">Copy this and paste it into <code>notes.json</code> in your GitHub repo. This replaces the entire file.</div>
-    <div class="export-code" id="exportCode"></div>
-    <button class="copy-btn" onclick="copyExport()">Copy to clipboard</button>
-  </div>
-
-  <div class="github-instructions">
-    <h3>Setting up on GitHub Pages</h3>
-    <div class="step"><div class="step-num">1</div><div>Create a new public repo — e.g. <code>ai-literacy-cards</code></div></div>
-    <div class="step"><div class="step-num">2</div><div>Upload this file as <code>index.html</code> and create a blank <code>notes.json</code> file containing <code>{}</code></div></div>
-    <div class="step"><div class="step-num">3</div><div>Go to Settings → Pages → Deploy from branch → main → / (root). Save.</div></div>
-    <div class="step"><div class="step-num">4</div><div>Your app lives at <code>https://[yourusername].github.io/ai-literacy-cards</code></div></div>
-    <div class="step"><div class="step-num">5</div><div>To save notes: type a note on any card, click "Save &amp; export", copy the JSON, paste it into <code>notes.json</code> in your repo and commit. Notes load from the file on next visit.</div></div>
-    <div class="step"><div class="step-num">6</div><div>To add new cards: ask Claude to update the <code>DECKS</code> object in this file with new cards, re-upload.</div></div>
   </div>
 
 </div>
@@ -693,24 +738,25 @@ const DECKS = {
   mxforgood: {
     label: "MX for Good",
     cards: [
+      { id: "mli-framework", term: "Machine Legibility Index (MLI)", category: "Core MLI", technical: "A four-pillar, 12-criterion scoring framework (0–100) measuring how readable a website is for AI agents. Pillars: Identity (who is this?), Reachability (can agents fetch it?), Structure (can agents parse the claims?), Currency (are the claims still true?). Total MLI = average of the four pillar scores.", plain: "A structured audit for AI readability. Four questions, 12 tests, one number. Bands: 'In the room' (80–100), 'Partially audible' (60–79), 'Hard to surface' (40–59), 'Not in the conversation' (0–39).", analogy: "Like WCAG for machine legibility — structured enough to be auditable, specific enough to tell you exactly what to fix and in what order." },
       { id: "machine-legibility", term: "Machine legibility", category: "Core MLI", technical: "The degree to which web content is structured and marked up in ways that enable automated systems to parse meaning, intent, and relationships without visual rendering.", plain: "How easy it is for an AI agent to understand what your content means and what actions are available. Not about visual design — about semantic structure.", analogy: "The difference between a beautifully designed but image-heavy PDF and a well-structured database record. Machines read the second one; humans read the first." },
-      { id: "structured-data-schema", term: "Structured data / schema.org", category: "Core MLI", technical: "Standardized markup vocabularies (JSON-LD, Microdata, RDFa) that annotate web content with machine-readable metadata, enabling agents to understand entity types, relationships, and properties.", plain: "Code you add to a webpage that tells machines what the content IS, not just what it says. 'This is a legal service. It's free. It operates in Spanish.'", analogy: "Like component documentation in a design system — the machine-readable spec that lets other systems integrate without guessing." },
+      { id: "public-interest-tag", term: "Public-interest tag", category: "Core MLI", technical: "An editorial annotation applied to five MLI criteria (I2, I3, R3, C2, C3) marking where implementation gaps disproportionately affect public-interest organizations. The tag is visible in the audit UI and PDF report; it does not alter scoring math or findings ranking.", plain: "Some criteria matter more for nonprofits, legal aid orgs, and community organizations than for commercial sites. MLI flags them so auditors know where equity stakes are highest — but doesn't tilt the math. Findings still rank by score impact alone.", analogy: "Like a priority flag in a project tracker — it surfaces what matters for a specific context without changing the underlying data." },
+      { id: "structured-data-schema", term: "Structured data / schema.org", category: "Core MLI", technical: "Standardized markup vocabulary for annotating web content with machine-readable metadata. MLI scores JSON-LD only — Microdata and RDFa are not counted toward the score. Enables agents to understand entity types, relationships, and properties.", plain: "Code you add to a webpage that tells machines what the content IS, not just what it says. 'This is a legal service. It's free. It operates in Spanish.' MLI audits only the JSON-LD form.", analogy: "Like component documentation in a design system — the machine-readable spec that lets other systems integrate without guessing." },
       { id: "semantic-html", term: "Semantic HTML", category: "Core MLI", technical: "Using native HTML elements (<button>, <nav>, <article>, <h1-h6>) to convey meaning and structure, rather than generic divs with ARIA — enables both assistive technology and automated agents to understand content relationships.", plain: "Using the right HTML tags so the structure is obvious to machines and screen readers. <h1> means 'main heading' not 'large text.'", analogy: "Typography hierarchy in design — using the visual system to show relationships. Semantic HTML does the same for machines." },
-      { id: "whose-voice", term: "Whose voice is in the room", category: "Core MLI", technical: "The representational equity problem: whose perspectives, stakeholders, and communities are present (or absent) in training data, affecting how LLMs surface and frame different viewpoints.", plain: "If your training data has 10x more content from powerful institutions than from community organizations, that power imbalance becomes the model's default.", analogy: "UX research that only includes one demographic — the system optimizes for them and fails everyone else, invisibly." },
       { id: "narrative-control", term: "Narrative control", category: "Narrative & Bias", technical: "The practice of shaping how a topic, organization, or concept is described across sources, so that when LLMs encounter it in training data, they reproduce that framing as a default.", plain: "How lobbying groups, companies, and institutions shape the language around their industry so the model learns 'this is how we talk about this topic.'", analogy: "Brand voice guidelines, but at scale across the entire internet — whoever controls the dominant narrative controls how models describe the topic." },
       { id: "false-balance-design", term: "False balance", category: "Narrative & Bias", technical: "A system presenting two positions with equal weight despite significant asymmetries in evidentiary support, institutional backing, or affected population — appears neutral but obscures power dynamics.", plain: "When an AI says 'some argue X, others argue Y' and makes them sound equivalent — even though one has peer research and the other has lobbying funding.", analogy: "A design that gives equal visual weight to 'Delete account' and 'Cancel' — technically balanced, functionally misleading." },
+      { id: "whose-voice", term: "Whose voice is in the room", category: "Narrative & Bias", technical: "The representational equity problem: whose perspectives, stakeholders, and communities are present (or absent) in training data, affecting how LLMs surface and frame different viewpoints.", plain: "If your training data has 10x more content from powerful institutions than from community organizations, that power imbalance becomes the model's default.", analogy: "UX research that only includes one demographic — the system optimizes for them and fails everyone else, invisibly." },
       { id: "citation-laundering-mxforgood", term: "Citation laundering", category: "Narrative & Bias", technical: "Process by which an advocacy position gains apparent credibility by being sequentially cited: advocacy → news → academic paper → policy document, arriving in training data as established fact.", plain: "A lobbying claim quoted in news → cited by a think tank → referenced in policy → arrives in LLM training looking like objective fact.", analogy: "A design pattern copied project to project until no one remembers why it exists, just that 'it's always been done that way.'" },
       { id: "training-data-representation", term: "Training data representation", category: "Narrative & Bias", technical: "The statistical fact that LLM outputs reflect the prevalence and framing of different viewpoints in training data — institutional voices appear more authoritative because they produce more written content.", plain: "Well-funded organizations publish more, get cited more, appear in more authoritative places. Models absorb that as 'legitimate vs. fringe.'", analogy: "If your design system documentation is 10x longer for common components, those become the default pattern — not because they're better, because they're documented." },
       { id: "epistemic-humility-design", term: "Epistemic humility (design problem)", category: "Epistemic Humility", technical: "Designing interfaces that accurately represent the limits and confidence of AI-generated content — distinguishing well-established claims, contested positions, and uncertain areas without appearing evasive.", plain: "The unsolved design problem: how do you make an AI interface that signals 'I'm confident about this' vs. 'this is contested' vs. 'I don't know'?", analogy: "Like error states in UX — the system is more trustworthy when it's honest about what it doesn't know." },
       { id: "confidence-signaling", term: "Confidence signaling", category: "Epistemic Humility", technical: "UI patterns that visually or textually distinguish between high-confidence outputs (well-established research), contested claims (multiple legitimate perspectives), and areas of uncertainty or data gaps.", plain: "Visual/textual signals so users know: is this researched fact, is this an industry claim, is this uncertain, is this reflecting one dominant framing?", analogy: "In design systems, using color, icons, and typography to signal different component states. Same principle — state is information." },
       { id: "source-provenance", term: "Source provenance", category: "Epistemic Humility", technical: "Surfacing the types of sources that shaped an AI response — government, industry, academic, advocacy, community — enabling users to calibrate trust based on source diversity and potential biases.", plain: "Telling the user 'this answer draws heavily from industry publications' or 'this includes peer-reviewed research and worker testimony' so they can judge for themselves.", analogy: "Design audit reports that show which design system components were used — transparency about what shaped the outcome." },
       { id: "language-equity-signals", term: "Language equity signals", category: "Epistemic Humility", technical: "Interface indicators that flag when a non-English response may have lower confidence due to training data imbalance — fewer tokens per concept, less refined patterns, lower quality sources available.", plain: "An honest signal: 'This answer is in Spanish, which has less training data, so confidence may be lower' — instead of false certainty in all languages.", analogy: "Component documentation that notes 'this pattern works better for English text due to word length' — honest about constraints." },
-      { id: "agentic-ai", term: "Agentic AI", category: "Agentic UX", technical: "Autonomous AI systems that can execute sequences of actions — navigate interfaces, fill forms, call APIs, execute code — rather than only generating text, making machine legibility critical for safety and effectiveness.", plain: "AI that doesn't just answer questions but does things: books appointments, searches websites, fills out forms. Requires your site to be readable by machines.", analogy: "The difference between a design spec and a fully built component library. Agentic AI acts in the world — machine legibility determines what it can do." },
-      { id: "prompt-injection", term: "Prompt injection", category: "Agentic UX", technical: "Attack vector where malicious instructions embedded in observed content (webpages, documents, emails) redirect an AI agent away from the user's intent, exploiting the agent's tendency to follow instructions.", plain: "Hidden instructions on a webpage or in a document that trick an AI agent into doing something other than what the user asked.", analogy: "A form field with fine print that changes what you're actually agreeing to — misdirection through embedded instructions." },
+      { id: "agentic-ai-mxfg", term: "Agentic AI", category: "Agentic UX", technical: "Autonomous AI systems that can execute sequences of actions — navigate interfaces, fill forms, call APIs, execute code — rather than only generating text, making machine legibility critical for safety and effectiveness.", plain: "AI that doesn't just answer questions but does things: books appointments, searches websites, fills out forms. Requires your site to be readable by machines.", analogy: "The difference between a design spec and a fully built component library. Agentic AI acts in the world — machine legibility determines what it can do." },
+      { id: "prompt-injection-mxfg", term: "Prompt injection", category: "Agentic UX", technical: "Attack vector where malicious instructions embedded in observed content (webpages, documents, emails) redirect an AI agent away from the user's intent, exploiting the agent's tendency to follow instructions.", plain: "Hidden instructions on a webpage or in a document that trick an AI agent into doing something other than what the user asked.", analogy: "A form field with fine print that changes what you're actually agreeing to — misdirection through embedded instructions." },
       { id: "safe-to-try-sandbox", term: "Safe-to-try sandbox mode", category: "Agentic UX", technical: "An interface pattern where agents stage or preview actions before execution, requiring human approval before completion — reducing harm from mistakes, bias, or attacks.", plain: "The agent shows you what it's about to do, you review and approve (or reject), then it executes. Like a review step before publish.", analogy: "Design mockup reviews before development — catch mistakes early." },
       { id: "intent-types", term: "Intent types", category: "Agentic UX", technical: "Four primary user intents in agent-facing interfaces: Informational (learn), Navigational (find), Commercial (evaluate/compare), Transactional (take action) — surface intent input early so agents can skip irrelevant steps.", plain: "Different reasons people come to your site: to learn, to find something, to evaluate options, or to do something. Make it obvious early so agents don't waste time.", analogy: "Information architecture that makes user goals obvious from the top level — homepage groups content by intent, not by content type." },
       { id: "prerender-ssr", term: "Pre-render / Server-Side Rendering (SSR)", category: "Design Principles", technical: "Delivering fully-rendered HTML server-side rather than relying on client-side JavaScript execution — ensures agents and assistive tech can access critical content without executing JS.", plain: "Your content must be readable without JavaScript running. Agents may not execute it; some users can't. Server-render critical content.", analogy: "Designing for slow networks or no-JavaScript browsers — good for everyone, essential for agents." },
-      { id: "semantic-naming", term: "Semantic naming (tokens)", category: "Design Principles", technical: "Naming design tokens by their functional meaning rather than their visual value — e.g., `button-primary-bg` (what it does) instead of `blue-500` (what it looks like) — enabling scalable remapping across brands and contexts.", plain: "Token names describe PURPOSE not APPEARANCE. `color-warning` means something regardless of whether it's orange or red.", analogy: "The three-tier token architecture — primitives are values, semantics are meaning, components consume semantics." },
       { id: "heading-hierarchy-structure", term: "Heading hierarchy as structure", category: "Design Principles", technical: "Using HTML heading levels (h1-h6) to define information architecture and relationships rather than for visual styling — agents parse heading hierarchy to understand content relationships and section importance.", plain: "Headings tell agents 'here's the main idea, here's a subtopic, here's a detail under that.' The nesting shows information structure.", analogy: "Outline or table of contents — the visual hierarchy shows readers where things fit. Headings do the same for machines." },
       { id: "icon-plus-label", term: "Icon + label always", category: "Design Principles", technical: "Never use icon-only controls in agent-facing interfaces — icons are visual; agents need text labels to understand what action is available and what it does.", plain: "An 'X' icon means nothing to an agent. 'Close' + icon means the agent understands the action. Always include text labels.", analogy: "Accessibility best practice — if you wouldn't use icon-only for screen readers, don't use it for agents either." }
     ]
@@ -734,55 +780,226 @@ const DECKS = {
   }
 };
 
+// ── State ────────────────────────────────────────────────
 let currentDeck = 'concepts';
 let currentIndex = 0;
 let isFlipped = false;
 let mastered = {};
 let notes = {};
+let sidebarOpen = false;
 
 Object.keys(DECKS).forEach(k => { mastered[k] = new Set(); });
 
 function currentCard() { return DECKS[currentDeck].cards[currentIndex]; }
 function noteKey() { return currentDeck + ':' + currentCard().id; }
 
-function loadNotes() {
-  fetch('notes.json')
-    .then(r => r.json())
-    .then(data => { notes = data || {}; updateNoteField(); })
-    .catch(() => { notes = {}; });
+// ── Settings ─────────────────────────────────────────────
+function getSettings() {
+  try { return JSON.parse(localStorage.getItem('ai-literacy-settings') || '{}'); }
+  catch { return {}; }
 }
 
-function updateNoteField() {
-  const ta = document.getElementById('noteInput');
-  if (ta) ta.value = notes[noteKey()] || '';
+function saveSettingsToStorage(s) {
+  localStorage.setItem('ai-literacy-settings', JSON.stringify(s));
 }
 
-function saveNote() {
-  const val = document.getElementById('noteInput').value.trim();
-  if (val) { notes[noteKey()] = val; }
-  else { delete notes[noteKey()]; }
-  showExport();
+// ── Sync status ───────────────────────────────────────────
+let syncClearTimer = null;
+
+function setSyncStatus(status) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  clearTimeout(syncClearTimer);
+  el.className = 'sync-status';
+  if (status === 'pending') { el.textContent = 'saving…'; }
+  else if (status === 'saving') { el.textContent = 'syncing…'; }
+  else if (status === 'saved') {
+    el.textContent = 'synced ✓';
+    el.classList.add('saved');
+    syncClearTimer = setTimeout(() => { el.textContent = ''; }, 3000);
+  } else if (status === 'local') {
+    el.textContent = 'saved locally';
+    syncClearTimer = setTimeout(() => { el.textContent = ''; }, 2000);
+  } else if (status === 'error') {
+    el.textContent = 'sync failed';
+    el.classList.add('error');
+  } else {
+    el.textContent = '';
+  }
 }
 
-function showExport() {
-  const panel = document.getElementById('exportPanel');
-  const code = document.getElementById('exportCode');
-  code.textContent = JSON.stringify(notes, null, 2);
-  panel.classList.add('open');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
+// ── Gist API ──────────────────────────────────────────────
+const GIST_FILENAME = 'ai-literacy-data.json';
 
-function closeExport() {
-  document.getElementById('exportPanel').classList.remove('open');
-}
-
-function copyExport() {
-  const text = document.getElementById('exportCode').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = 'Copy to clipboard'; }, 2000);
+async function gistCreate(token) {
+  const res = await fetch('https://api.github.com/gists', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      description: 'AI Literacy Flashcards — progress data',
+      public: false,
+      files: { [GIST_FILENAME]: { content: JSON.stringify({ mastered: {}, notes: {} }) } }
+    })
   });
+  if (!res.ok) throw new Error(`GitHub error ${res.status}`);
+  const data = await res.json();
+  return data.id;
+}
+
+async function gistRead(token, gistId) {
+  const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) throw new Error(`GitHub error ${res.status}`);
+  const data = await res.json();
+  const raw = data.files[GIST_FILENAME]?.content;
+  return raw ? JSON.parse(raw) : { mastered: {}, notes: {} };
+}
+
+async function gistWrite(token, gistId, payload) {
+  const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify(payload) } } })
+  });
+  if (!res.ok) throw new Error(`GitHub error ${res.status}`);
+}
+
+// ── Data load / save ──────────────────────────────────────
+function buildPayload() {
+  const payload = { mastered: {}, notes };
+  Object.keys(DECKS).forEach(k => { payload.mastered[k] = [...mastered[k]]; });
+  return payload;
+}
+
+function applyData(data) {
+  if (data.mastered) {
+    Object.keys(data.mastered).forEach(k => {
+      if (mastered[k] !== undefined) mastered[k] = new Set(data.mastered[k]);
+    });
+  }
+  if (data.notes) notes = data.notes;
+}
+
+async function loadData() {
+  // Try localStorage cache first for fast render
+  const cached = localStorage.getItem('ai-literacy-cache');
+  if (cached) { try { applyData(JSON.parse(cached)); } catch {} }
+
+  // Then try Gist (overwrites cache data if available)
+  const { token, gistId } = getSettings();
+  if (!token || !gistId) return;
+  try {
+    setSyncStatus('saving');
+    const data = await gistRead(token, gistId);
+    applyData(data);
+    localStorage.setItem('ai-literacy-cache', JSON.stringify(data));
+    setSyncStatus('saved');
+    renderAll();
+  } catch {
+    setSyncStatus('error');
+  }
+}
+
+let saveTimer = null;
+
+function scheduleSave() {
+  setSyncStatus('pending');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 1500);
+}
+
+async function doSave() {
+  const payload = buildPayload();
+  localStorage.setItem('ai-literacy-cache', JSON.stringify(payload));
+  const { token, gistId } = getSettings();
+  if (!token || !gistId) { setSyncStatus('local'); return; }
+  setSyncStatus('saving');
+  try {
+    await gistWrite(token, gistId, payload);
+    setSyncStatus('saved');
+  } catch {
+    setSyncStatus('error');
+  }
+}
+
+// ── Settings UI ───────────────────────────────────────────
+function toggleSettings() {
+  const panel = document.getElementById('settingsPanel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) {
+    const { token, gistId } = getSettings();
+    document.getElementById('tokenInput').value = token || '';
+    document.getElementById('gistIdInput').value = gistId || '';
+    document.getElementById('settingsFeedback').textContent = '';
+    document.getElementById('settingsFeedback').className = 'settings-feedback';
+  }
+}
+
+function setSettingsFeedback(msg, type) {
+  const el = document.getElementById('settingsFeedback');
+  el.textContent = msg;
+  el.className = 'settings-feedback' + (type ? ' ' + type : '');
+}
+
+async function handleSaveSettings() {
+  const btn = document.getElementById('saveSettingsBtn');
+  const token = document.getElementById('tokenInput').value.trim();
+  const gistIdInput = document.getElementById('gistIdInput').value.trim();
+
+  if (!token) { setSettingsFeedback('Token is required.', 'err'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Working…';
+
+  try {
+    let gistId = gistIdInput;
+
+    if (!gistId) {
+      setSettingsFeedback('Creating Gist…', '');
+      gistId = await gistCreate(token);
+      document.getElementById('gistIdInput').value = gistId;
+      setSettingsFeedback(`Gist created. ID: ${gistId}`, 'ok');
+    }
+
+    // Verify we can read it
+    setSettingsFeedback('Verifying…', '');
+    const data = await gistRead(token, gistId);
+
+    saveSettingsToStorage({ token, gistId });
+    applyData(data);
+    localStorage.setItem('ai-literacy-cache', JSON.stringify(data));
+
+    setSettingsFeedback('Connected. Syncing now…', 'ok');
+    await doSave();
+
+    renderAll();
+    setTimeout(() => {
+      document.getElementById('settingsPanel').classList.remove('open');
+    }, 1200);
+
+  } catch (e) {
+    setSettingsFeedback(`Error: ${e.message}`, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save & sync';
+  }
+}
+
+// ── Sidebar ───────────────────────────────────────────────
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  const list = document.getElementById('cardList');
+  const btn = document.getElementById('sidebarToggleBtn');
+  list.classList.toggle('open', sidebarOpen);
+  btn.textContent = sidebarOpen ? '▲' : '▼';
+}
+
+// ── Render ────────────────────────────────────────────────
+function renderAll() {
+  renderTabs();
+  renderProgress();
+  renderCard();
 }
 
 function renderTabs() {
@@ -798,15 +1015,13 @@ function renderTabs() {
 }
 
 function renderSidebar() {
-  const sidebar = document.getElementById('sidebar');
   const deck = DECKS[currentDeck];
-  sidebar.innerHTML = `<div class="sidebar-title">${deck.label}</div><div class="card-list">` +
-    deck.cards.map((card, idx) => {
-      const isMastered = mastered[currentDeck].has(idx);
-      const isActive = idx === currentIndex;
-      return `<button class="card-link ${isMastered ? 'mastered' : ''} ${isActive ? 'active' : ''}" onclick="jumpToCard(${idx})">${card.term}</button>`;
-    }).join('') +
-    '</div>';
+  document.getElementById('sidebarTitle').textContent = deck.label;
+  document.getElementById('cardList').innerHTML = deck.cards.map((card, idx) => {
+    const isMastered = mastered[currentDeck].has(card.id);
+    const isActive = idx === currentIndex;
+    return `<button class="card-link ${isMastered ? 'mastered' : ''} ${isActive ? 'active' : ''}" onclick="jumpToCard(${idx})">${card.term}</button>`;
+  }).join('');
 }
 
 function renderProgress() {
@@ -831,11 +1046,12 @@ function renderCard() {
 
   document.getElementById('notesSection').style.display = 'block';
 
-  while (mastered[currentDeck].has(currentIndex)) {
+  while (mastered[currentDeck].has(deck[currentIndex].id)) {
     currentIndex = (currentIndex + 1) % deck.length;
   }
 
   const card = deck[currentIndex];
+  const isMastered = mastered[currentDeck].has(card.id);
   const remaining = deck.length - mastered[currentDeck].size;
   const labelSuffix = currentDeck === 'landscape' ? 'Action' : 'Design analogy';
 
@@ -866,8 +1082,8 @@ function renderCard() {
     </div>
     ${isFlipped ? `
     <div class="action-row">
-      <button class="btn" onclick="toggleMastered(event)">${mastered[currentDeck].has(currentIndex) ? '↶ Mark as learning' : '← Still learning'}</button>
-      <button class="btn btn-mastered" onclick="toggleAndNext(event)">${mastered[currentDeck].has(currentIndex) ? 'Mastered — next →' : 'Got it ✓'}</button>
+      <button class="btn" onclick="toggleMastered(event)">${isMastered ? '↶ Mark as learning' : '← Still learning'}</button>
+      <button class="btn btn-mastered" onclick="toggleAndNext(event)">${isMastered ? 'Mastered — next →' : 'Got it ✓'}</button>
     </div>` : `<div class="flip-cue">tap card to flip</div>`}
     <div class="nav-row">
       <button class="nav-btn" onclick="prevCard(event)" ${currentIndex === 0 ? 'disabled' : ''}>← Prev</button>
@@ -879,6 +1095,7 @@ function renderCard() {
   updateNoteField();
 }
 
+// ── Card actions ──────────────────────────────────────────
 function flipCard() { isFlipped = !isFlipped; renderCard(); }
 
 function nextCard(e) {
@@ -886,7 +1103,10 @@ function nextCard(e) {
   const deck = DECKS[currentDeck].cards;
   let next = (currentIndex + 1) % deck.length;
   let attempts = 0;
-  while (mastered[currentDeck].has(next) && attempts < deck.length) { next = (next + 1) % deck.length; attempts++; }
+  while (mastered[currentDeck].has(deck[next].id) && attempts < deck.length) {
+    next = (next + 1) % deck.length;
+    attempts++;
+  }
   currentIndex = next;
   isFlipped = false;
   renderCard();
@@ -902,31 +1122,27 @@ function prevCard(e) {
 
 function toggleMastered(e) {
   if (e) e.stopPropagation();
-  if (mastered[currentDeck].has(currentIndex)) {
-    mastered[currentDeck].delete(currentIndex);
+  const id = currentCard().id;
+  if (mastered[currentDeck].has(id)) {
+    mastered[currentDeck].delete(id);
   } else {
-    mastered[currentDeck].add(currentIndex);
+    mastered[currentDeck].add(id);
   }
   renderProgress();
   renderTabs();
   renderCard();
+  scheduleSave();
 }
 
 function toggleAndNext(e) {
   if (e) e.stopPropagation();
-  if (!mastered[currentDeck].has(currentIndex)) {
-    mastered[currentDeck].add(currentIndex);
+  const id = currentCard().id;
+  if (!mastered[currentDeck].has(id)) {
+    mastered[currentDeck].add(id);
     renderProgress();
     renderTabs();
+    scheduleSave();
   }
-  nextCard(null);
-}
-
-function markMastered(e) {
-  if (e) e.stopPropagation();
-  mastered[currentDeck].add(currentIndex);
-  renderProgress();
-  renderTabs();
   nextCard(null);
 }
 
@@ -937,6 +1153,7 @@ function resetDeck() {
   renderProgress();
   renderTabs();
   renderCard();
+  scheduleSave();
 }
 
 function jumpToCard(idx) {
@@ -956,11 +1173,30 @@ function switchDeck(key) {
   renderSidebar();
 }
 
-loadNotes();
-renderTabs();
-renderProgress();
-renderCard();
-renderSidebar();
+// ── Notes ─────────────────────────────────────────────────
+function updateNoteField() {
+  const ta = document.getElementById('noteInput');
+  if (ta) ta.value = notes[noteKey()] || '';
+}
+
+function saveNote() {
+  const val = document.getElementById('noteInput').value.trim();
+  if (val) { notes[noteKey()] = val; }
+  else { delete notes[noteKey()]; }
+  scheduleSave();
+}
+
+// ── Init ──────────────────────────────────────────────────
+const { token, gistId } = getSettings();
+if (!token || !gistId) {
+  document.getElementById('settingsPanel').classList.add('open');
+}
+
+loadData().then(() => {
+  renderAll();
+});
+
+renderAll();
 </script>
 </body>
 </html>
